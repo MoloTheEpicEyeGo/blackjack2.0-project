@@ -1,12 +1,28 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class gui
 {
+    //vars
+    private final int cardWidth = 110;
+    private final int cardLength = 154;
+    private dealer dealer;
+    private Cards deck;
+    private player player;
+    private JLabel balanceLabel;
+    private JTextField betField;
+    int currentBet = 0;
+
+
     public gui ()
     {
-        final int cardWidth = 110;
-        final int cardLength = 154;
+        //instances
+        dealer = new dealer();
+        deck = new Cards();
+        player = new player(500);
+        deck.shuffleDeck();
+
         //main window
         JFrame frame = new JFrame("Blackjack 2.0");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -22,30 +38,62 @@ public class gui
             {
                 super.paintComponent(g);
 
-                Image hiddenCard = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
-                g.drawImage(hiddenCard, 20, 20, cardWidth, cardLength, null);
+                //draw dealers hand
+                ArrayList<String> dealerHand = dealer.getHand();
+                for (int i = 0; i < dealerHand.size(); i++) {
+                    String card = dealerHand.get(i);
+
+                    //first card is visible, second card hidden
+                    if (i == 1) {
+                        Image hiddenCard = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
+                        g.drawImage(hiddenCard, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
+                    } else {
+                        Image cardImage = new ImageIcon(getClass().getResource("./cards/" + card + ".png")).getImage();
+                        g.drawImage(cardImage, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
+                    }
+                }
             }
 
         };
         panel.setBackground(new Color(53, 101, 77));
 
         //button panel (where buttons are located)
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(new Color(101, 29, 29));
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.setBackground(new Color(255, 255, 255));
 
-        //define individual buttons
-        JButton dealButton = new JButton("Deal");
-        JButton hitButton = new JButton("Hit");
-        JButton stayButton = new JButton("Stay");
+        //leftside of button panel
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new FlowLayout()); //making it "flow" so we can add to left of butpanel
+        leftPanel.setBackground(new Color(255, 255, 255));
+        betField = new JTextField(3);
 
-        dealButton.setFocusable(false);
-        hitButton.setFocusable(false);
-        stayButton.setFocusable(false);
+        JButton dealButton = new JButton("deal");
+        leftPanel.add(new JLabel("bet$"));
+        leftPanel.add(betField);
+        leftPanel.add(dealButton);
+
+        //middle of button panel
+        JPanel middlePanel = new JPanel();
+        middlePanel.setLayout(new FlowLayout());
+        middlePanel.setBackground(new Color(255, 255, 255));
+        JButton hitButton = new JButton("hit");
+        JButton stayButton = new JButton("stand");
+        middlePanel.add(hitButton);
+        middlePanel.add(stayButton);
+
+
+        //right of button panel
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new FlowLayout());
+        rightPanel.setBackground(new Color(255, 255, 255));
+        balanceLabel = new JLabel("Balance: $" + player.getMoney());
+        rightPanel.add(balanceLabel);
+
 
         //add individual buttons&buttons to the button panel
-        buttonPanel.add(dealButton, BorderLayout.WEST);
-        buttonPanel.add(hitButton);
-        buttonPanel.add(stayButton);
+        buttonPanel.add(leftPanel, BorderLayout.WEST);
+        buttonPanel.add(middlePanel, BorderLayout.CENTER);
+        buttonPanel.add(rightPanel, BorderLayout.EAST);
 
         //add components to the frame with layout positions
         frame.setLayout(new BorderLayout());
@@ -54,5 +102,6 @@ public class gui
 
         //make the frame visible
         frame.setVisible(true);
+
     }
 }
