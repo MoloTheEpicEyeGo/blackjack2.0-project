@@ -5,6 +5,8 @@ public class gui
 {
     public gui ()
     {
+        final int cardWidth = 110;
+        final int cardLength = 154;
         //main window
         JFrame frame = new JFrame("Blackjack 2.0");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -13,7 +15,18 @@ public class gui
         frame.setLocationRelativeTo(null); //set frame to middle of the screen
 
         //workspace inside the window
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel()
+        {
+            @Override
+            public void paintComponent(Graphics g)
+            {
+                super.paintComponent(g);
+
+                Image hiddenCard = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
+                g.drawImage(hiddenCard, 20, 20, cardWidth, cardLength, null);
+            }
+
+        };
         panel.setBackground(new Color(53, 101, 77));
 
         //button panel (where buttons are located)
