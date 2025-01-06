@@ -1,8 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 
-public class gui {
-    public static void main(String[] args)
+public class gui
+{
+    public gui ()
     {
         //main window
         JFrame frame = new JFrame("Blackjack 2.0");
@@ -28,7 +29,7 @@ public class gui {
         hitButton.setFocusable(false);
         stayButton.setFocusable(false);
 
-        //add individual buttons to the button panel
+        //add individual buttons&buttons to the button panel
         buttonPanel.add(dealButton, BorderLayout.WEST);
         buttonPanel.add(hitButton);
         buttonPanel.add(stayButton);
