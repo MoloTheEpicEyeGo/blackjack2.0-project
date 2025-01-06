@@ -1,1 +1,1 @@
-# blackjack2.0-project
+# blackjack2.0-project (in progress)
