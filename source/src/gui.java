@@ -52,6 +52,15 @@ public class gui
                         g.drawImage(cardImage, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
                     }
                 }
+
+                //draw players hand
+                ArrayList<String> playerHand = player.getHand();
+                for (int i = 0; i < playerHand.size(); i++) {
+                    String card = playerHand.get(i);
+
+
+                }
+
             }
 
         };
@@ -66,7 +75,6 @@ public class gui
         leftPanel.setLayout(new FlowLayout()); //making it "flow" so we can add to left of butpanel
         leftPanel.setBackground(new Color(255, 255, 255));
         betField = new JTextField(3);
-
         JButton dealButton = new JButton("deal");
         leftPanel.add(new JLabel("bet$"));
         leftPanel.add(betField);
@@ -94,6 +102,14 @@ public class gui
         buttonPanel.add(leftPanel, BorderLayout.WEST);
         buttonPanel.add(middlePanel, BorderLayout.CENTER);
         buttonPanel.add(rightPanel, BorderLayout.EAST);
+
+        //adding actions to buttons
+        dealButton.addActionListener(e -> {
+           dealer.clearHand();
+           dealer.firstTwo(deck);
+           player.firstTwo(deck);
+           panel.repaint();
+        });
 
         //add components to the frame with layout positions
         frame.setLayout(new BorderLayout());
