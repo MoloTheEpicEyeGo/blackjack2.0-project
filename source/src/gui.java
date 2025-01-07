@@ -12,8 +12,7 @@ public class gui
     private player player;
     private JLabel balanceLabel;
     private JTextField betField;
-    int currentBet = 0;
-
+    int playerScore = 0;
 
     public gui ()
     {
@@ -92,6 +91,8 @@ public class gui
         hitButton.setFocusable(false);
         JButton stayButton = new JButton("stand");
         stayButton.setFocusable(false);
+        stayButton.setEnabled(false);
+        hitButton.setEnabled(false);
         middlePanel.add(hitButton);
         middlePanel.add(stayButton);
 
@@ -120,8 +121,12 @@ public class gui
                 }
                 else
                 {
-                    currentBet = bet;
-                    player.bet(currentBet);
+                    //rest game
+                    dealer.clearHand();
+                    player.clearHand();
+                    panel.repaint(); //clears the screen cause theres nothing in both dealer$players hand
+
+                    player.bet(bet);
                     balanceLabel.setText("Balance: $" + player.getMoney());
                     //gives two cards to their respective array
                     dealer.firstTwo(deck);
@@ -129,11 +134,37 @@ public class gui
 
                     //calls the panel to update the gui window
                     panel.repaint();
+
+
+                    //make hit and stand ava
+                    hitButton.setEnabled(true);
+                    stayButton.setEnabled(true);
+
+                    //make deal un-ava so you cant deal mid-game
+                    dealButton.setEnabled(false);
                 }
             } catch(NumberFormatException ex)
             {
                 JOptionPane.showMessageDialog(null, "enter valid number", "", JOptionPane.ERROR_MESSAGE);
             }
+        });
+
+        hitButton.addActionListener(e ->
+        {
+            player.hit(deck);
+            panel.repaint();
+
+            //calcs players hand
+            playerScore = util.calculateHand(player.getHand());
+
+            if (playerScore > 21)
+            {
+                JOptionPane.showMessageDialog(null, "you bust!", "", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        stayButton.addActionListener(e ->{
+
         });
 
         //add individual buttons&buttons to the button panel
