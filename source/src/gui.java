@@ -58,6 +58,9 @@ public class gui
                 for (int i = 0; i < playerHand.size(); i++) {
                     String card = playerHand.get(i);
 
+                    //draws cards
+                    Image cardImage = new ImageIcon(getClass().getResource("./cards/" + card + ".png")).getImage();
+                    g.drawImage(cardImage, 20 + (i * (cardWidth + 20)), 350, cardWidth, cardLength, null);
 
                 }
 
@@ -76,6 +79,7 @@ public class gui
         leftPanel.setBackground(new Color(255, 255, 255));
         betField = new JTextField(3);
         JButton dealButton = new JButton("deal");
+        dealButton.setFocusable(false);
         leftPanel.add(new JLabel("bet$"));
         leftPanel.add(betField);
         leftPanel.add(dealButton);
@@ -85,7 +89,9 @@ public class gui
         middlePanel.setLayout(new FlowLayout());
         middlePanel.setBackground(new Color(255, 255, 255));
         JButton hitButton = new JButton("hit");
+        hitButton.setFocusable(false);
         JButton stayButton = new JButton("stand");
+        stayButton.setFocusable(false);
         middlePanel.add(hitButton);
         middlePanel.add(stayButton);
 
@@ -97,19 +103,44 @@ public class gui
         balanceLabel = new JLabel("Balance: $" + player.getMoney());
         rightPanel.add(balanceLabel);
 
+        //adding actions to buttons
+
+            //deal actions
+        dealButton.addActionListener(e -> {
+            try
+            {
+                int bet = Integer.parseInt(betField.getText());
+                if (bet < 25)
+                {
+                    JOptionPane.showMessageDialog(null, "minimum bet is 25$", "", JOptionPane.ERROR_MESSAGE);
+                }
+                else if (bet > player.getMoney())
+                {
+                    JOptionPane.showMessageDialog(null, "bet exceeds balance", "", JOptionPane.ERROR_MESSAGE);
+                }
+                else
+                {
+                    currentBet = bet;
+                    player.bet(currentBet);
+                    balanceLabel.setText("Balance: $" + player.getMoney());
+                    //gives two cards to their respective array
+                    dealer.firstTwo(deck);
+                    player.firstTwo(deck);
+
+                    //calls the panel to update the gui window
+                    panel.repaint();
+                }
+            } catch(NumberFormatException ex)
+            {
+                JOptionPane.showMessageDialog(null, "enter valid number", "", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         //add individual buttons&buttons to the button panel
         buttonPanel.add(leftPanel, BorderLayout.WEST);
         buttonPanel.add(middlePanel, BorderLayout.CENTER);
         buttonPanel.add(rightPanel, BorderLayout.EAST);
 
-        //adding actions to buttons
-        dealButton.addActionListener(e -> {
-           dealer.clearHand();
-           dealer.firstTwo(deck);
-           player.firstTwo(deck);
-           panel.repaint();
-        });
 
         //add components to the frame with layout positions
         frame.setLayout(new BorderLayout());
