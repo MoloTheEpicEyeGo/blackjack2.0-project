@@ -7,11 +7,11 @@ public class gui
     //vars
     private final int cardWidth = 110;
     private final int cardLength = 154;
-    private dealer dealer;
-    private Cards deck;
-    private player player;
-    private JLabel balanceLabel;
-    private JTextField betField;
+    private final dealer dealer;
+    private final Cards deck;
+    private final player player;
+    private final JLabel balanceLabel;
+    private final JTextField betField;
     int playerScore = 0;
 
     public gui ()
@@ -149,6 +149,7 @@ public class gui
             }
         });
 
+        //hit actions
         hitButton.addActionListener(e ->
         {
             player.hit(deck);
@@ -160,6 +161,11 @@ public class gui
             if (playerScore > 21)
             {
                 JOptionPane.showMessageDialog(null, "you bust!", "", JOptionPane.ERROR_MESSAGE);
+
+                //resetgame
+                hitButton.setEnabled(false);
+                stayButton.setEnabled(false);
+                dealButton.setEnabled(true);
             }
         });
 
@@ -180,6 +186,5 @@ public class gui
 
         //make the frame visible
         frame.setVisible(true);
-
     }
 }
