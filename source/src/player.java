@@ -51,6 +51,13 @@ public class player
         this.money += bet * 2;
     }
 
+    public void blackjackWin(int bet)
+    {
+        this.money += (bet * 2) + (bet / 2);
+    }
+
+
+
     public void pushMoney(int bet)
     {
         this.money += bet;
