@@ -7,11 +7,13 @@ public class gui
     //vars
     private final int cardWidth = 110;
     private final int cardLength = 154;
+    private boolean cardReveal = false;
     private final dealer dealer;
     private final Cards deck;
     private final player player;
     private final JLabel balanceLabel;
     private final JTextField betField;
+    int currentBet = 0;
     int playerScore = 0;
 
     public gui ()
@@ -25,7 +27,7 @@ public class gui
         //main window
         JFrame frame = new JFrame("Blackjack 2.0");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 600);
+        frame.setSize(1200, 600);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null); //set frame to middle of the screen
 
@@ -39,14 +41,26 @@ public class gui
 
                 //draw dealers hand
                 ArrayList<String> dealerHand = dealer.getHand();
-                for (int i = 0; i < dealerHand.size(); i++) {
+                for (int i = 0; i < dealerHand.size(); i++)
+                {
                     String card = dealerHand.get(i);
 
                     //first card is visible, second card hidden
-                    if (i == 1) {
-                        Image hiddenCard = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
-                        g.drawImage(hiddenCard, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
-                    } else {
+                    if (i == 1)
+                    {
+                        if (cardReveal)
+                        {
+                            Image cardImage = new ImageIcon(getClass().getResource("./cards/" + card + ".png")).getImage();
+                            g.drawImage(cardImage, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
+                        }
+                        else
+                        {
+                            Image hiddenCard = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
+                            g.drawImage(hiddenCard, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
+                        }
+                    }
+                    else
+                    {
                         Image cardImage = new ImageIcon(getClass().getResource("./cards/" + card + ".png")).getImage();
                         g.drawImage(cardImage, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
                     }
@@ -79,7 +93,7 @@ public class gui
         betField = new JTextField(3);
         JButton dealButton = new JButton("deal");
         dealButton.setFocusable(false);
-        leftPanel.add(new JLabel("bet$"));
+        leftPanel.add(new JLabel("bet"));
         leftPanel.add(betField);
         leftPanel.add(dealButton);
 
@@ -106,12 +120,13 @@ public class gui
 
         //adding actions to buttons
 
-            //deal actions
+            //TODO DEAL ACTIONS
         dealButton.addActionListener(e -> {
             try
             {
                 int bet = Integer.parseInt(betField.getText());
-                if (bet < 25)
+                currentBet = bet;
+                if (currentBet < 25)
                 {
                     JOptionPane.showMessageDialog(null, "minimum bet is 25$", "", JOptionPane.ERROR_MESSAGE);
                 }
@@ -125,6 +140,12 @@ public class gui
                     dealer.clearHand();
                     player.clearHand();
                     panel.repaint(); //clears the screen cause theres nothing in both dealer$players hand
+
+                    //iff less than 10 cards, reshuffles
+                    if (deck.remainingCards() < 10)
+                    {
+                        deck.shuffleDeck();
+                    }
 
                     player.bet(bet);
                     balanceLabel.setText("Balance: $" + player.getMoney());
@@ -149,7 +170,7 @@ public class gui
             }
         });
 
-        //hit actions
+        //TODO HIT ACTIONS
         hitButton.addActionListener(e ->
         {
             player.hit(deck);
@@ -163,14 +184,78 @@ public class gui
                 JOptionPane.showMessageDialog(null, "you bust!", "", JOptionPane.ERROR_MESSAGE);
 
                 //resetgame
+                cardReveal = false;
                 hitButton.setEnabled(false);
                 stayButton.setEnabled(false);
                 dealButton.setEnabled(true);
             }
         });
 
-        stayButton.addActionListener(e ->{
+        //TODO STAND ACTIONS
+        stayButton.addActionListener(e -> {
+            //set cardReveal to true so the hidden card is shown
+            cardReveal = true;
+            panel.repaint(); //update panel to reveal the hidden card
 
+            //disable the hit button
+            hitButton.setEnabled(false);
+
+            //timer to handle the dealer's moves with delay
+            Timer dealerTimer = new Timer(800, null); // 800ms delay
+            dealerTimer.addActionListener(timerEvent -> {
+                int dealerScore = util.calculateHand(dealer.getHand());
+
+                //dealer keeps hitting while under 17
+                if (dealerScore < 17) {
+                    dealer.hit(deck);
+                    panel.repaint(); //reveals hidden card
+
+                    //check dealer busts
+                    if (dealerScore > 21) {
+                        dealerTimer.stop(); // Stop the timer
+                        JOptionPane.showMessageDialog(null, "dealer bust!", "", JOptionPane.ERROR_MESSAGE);
+                        player.winMoney(currentBet);
+
+
+                        balanceLabel.setText("Balance: $" + player.getMoney());
+                        //resetgame
+                        cardReveal = false;
+                        hitButton.setEnabled(false);
+                        stayButton.setEnabled(false);
+                        dealButton.setEnabled(true);
+                        return;
+                    }
+                } else {
+                    //dealers turn is done
+                    dealerTimer.stop(); //stop the timer
+                    int playerScore = util.calculateHand(player.getHand());
+
+                    //comparing scores
+                    if (dealerScore > 21) {
+                        JOptionPane.showMessageDialog(null, "dealer bust!", "", JOptionPane.INFORMATION_MESSAGE);
+                        player.winMoney(currentBet);
+                    } else if (dealerScore == playerScore) {
+                        JOptionPane.showMessageDialog(null, "push!", "", JOptionPane.INFORMATION_MESSAGE);
+                        player.pushMoney(currentBet);
+                    } else if (dealerScore > playerScore) {
+                        JOptionPane.showMessageDialog(null, "lose!", "", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "win!", "", JOptionPane.INFORMATION_MESSAGE);
+                        player.winMoney(currentBet);
+                    }
+
+                    //update money
+                    balanceLabel.setText("Balance: $" + player.getMoney());
+                    //resetgame
+                    cardReveal = false;
+                    hitButton.setEnabled(false);
+                    stayButton.setEnabled(false);
+                    dealButton.setEnabled(true);
+                }
+            });
+
+            dealerTimer.setRepeats(true); // Timer repeats for dealer's actions
+            dealerTimer.start(); // Start the timer
         });
 
         //add individual buttons&buttons to the button panel
