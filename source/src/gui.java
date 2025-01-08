@@ -136,13 +136,14 @@ public class gui
                 }
                 else
                 {
+
                     //rest game
                     dealer.clearHand();
                     player.clearHand();
                     panel.repaint(); //clears the screen cause theres nothing in both dealer$players hand
 
                     //iff less than 10 cards, reshuffles
-                    if (deck.remainingCards() < 10)
+                    if (deck.remainingCards() < 20)
                     {
                         deck.shuffleDeck();
                     }
@@ -163,6 +164,33 @@ public class gui
 
                     //make deal un-ava so you cant deal mid-game
                     dealButton.setEnabled(false);
+
+                    //blackjack checker for both player & dealer
+                    if (util.calculateHand(player.hand) == 21)
+                    {
+                        //resetgame
+                        cardReveal = false;
+                        hitButton.setEnabled(false);
+                        stayButton.setEnabled(false);
+                        dealButton.setEnabled(true);
+                        player.blackjackWin(currentBet);
+                        JOptionPane.showMessageDialog(null, "win!", "", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    else if (util.calculateHand(dealer.hand) == 21)
+                    {
+                        cardReveal = true;
+
+                        //updates frame to show blackjack for dealer
+                        panel.repaint();
+
+                        //resetgame
+                        cardReveal = false;
+                        hitButton.setEnabled(false);
+                        stayButton.setEnabled(false);
+                        dealButton.setEnabled(true);
+                        JOptionPane.showMessageDialog(null, "dealer has blackjack!", "", JOptionPane.INFORMATION_MESSAGE);
+                    }
+
                 }
             } catch(NumberFormatException ex)
             {
@@ -193,6 +221,7 @@ public class gui
 
         //TODO STAND ACTIONS
         stayButton.addActionListener(e -> {
+            stayButton.setEnabled(false);
             //set cardReveal to true so the hidden card is shown
             cardReveal = true;
             panel.repaint(); //update panel to reveal the hidden card
