@@ -50,18 +50,18 @@ public class gui
                     {
                         if (cardReveal)
                         {
-                            Image cardImage = new ImageIcon(getClass().getResource("./cards/" + card + ".png")).getImage();
+                            Image cardImage = new ImageIcon(getClass().getResource("/cards/" + card + ".png")).getImage();
                             g.drawImage(cardImage, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
                         }
                         else
                         {
-                            Image hiddenCard = new ImageIcon(getClass().getResource("./cards/BACK.png")).getImage();
+                            Image hiddenCard = new ImageIcon(getClass().getResource("/cards/BACK.png")).getImage();
                             g.drawImage(hiddenCard, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
                         }
                     }
                     else
                     {
-                        Image cardImage = new ImageIcon(getClass().getResource("./cards/" + card + ".png")).getImage();
+                        Image cardImage = new ImageIcon(getClass().getResource("/cards/" + card + ".png")).getImage();
                         g.drawImage(cardImage, 20 + (i * (cardWidth + 20)), 20, cardWidth, cardLength, null);
                     }
                 }
@@ -72,7 +72,7 @@ public class gui
                     String card = playerHand.get(i);
 
                     //draws cards
-                    Image cardImage = new ImageIcon(getClass().getResource("./cards/" + card + ".png")).getImage();
+                    Image cardImage = new ImageIcon(getClass().getResource("/cards/" + card + ".png")).getImage();
                     g.drawImage(cardImage, 20 + (i * (cardWidth + 20)), 350, cardWidth, cardLength, null);
 
                 }
@@ -142,11 +142,13 @@ public class gui
                     player.clearHand();
                     panel.repaint(); //clears the screen cause theres nothing in both dealer$players hand
 
-                    //iff less than 10 cards, reshuffles
+                    //if less than 10 cards, reshuffles
                     if (deck.remainingCards() < 20)
                     {
                         deck.shuffleDeck();
+                        JOptionPane.showMessageDialog(null, "deck shuffled", "", JOptionPane.INFORMATION_MESSAGE);
                     }
+
 
                     player.bet(bet);
                     balanceLabel.setText("Balance: $" + player.getMoney());
