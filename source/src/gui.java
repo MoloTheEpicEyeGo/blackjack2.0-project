@@ -145,7 +145,7 @@ public class gui
                     //if less than 10 cards, reshuffles
                     if (deck.remainingCards() < 20)
                     {
-                        deck.shuffleDeck();
+                        deck.initializeDeck();
                         JOptionPane.showMessageDialog(null, "deck shuffled", "", JOptionPane.INFORMATION_MESSAGE);
                     }
 
