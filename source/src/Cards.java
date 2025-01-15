@@ -28,7 +28,7 @@ public class Cards
             "J-H", "J-S", "K-C", "K-D", "K-H", "K-S", "Q-C",
             "Q-D", "Q-H", "Q-S"
     };
-
+    private String[] newDeck = Arrays.copyOf(cards, cards.length);
 
     //shuffle deck every time (will change so it's possible to card count)
     public void shuffleDeck()
@@ -44,6 +44,11 @@ public class Cards
         }
     }
 
+    public void initializeDeck() {
+        newDeck = Arrays.copyOf(newDeck, newDeck.length);
+        topIndex = 0;
+        shuffleDeck();
+    }
 
     // Override toString() to return the full deck as a string
     @Override
