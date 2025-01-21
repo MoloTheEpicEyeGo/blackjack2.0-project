@@ -25,10 +25,6 @@ public class dealer
         hand.add(card);
     }
 
-    public String printHand()
-    {
-        return "dealer hand: [" + hand.getFirst() + "] [x]";
-    }
 
     //returns whole hand
     public ArrayList<String> getHand()
