@@ -170,13 +170,17 @@ public class gui
                     //blackjack checker for both player & dealer
                     if (util.calculateHand(player.hand) == 21)
                     {
+                        cardReveal = true;
+                        panel.repaint(); //update panel to reveal the hidden card
+
+                        JOptionPane.showMessageDialog(null, "win!", "", JOptionPane.INFORMATION_MESSAGE);
+
                         //resetgame
                         cardReveal = false;
                         hitButton.setEnabled(false);
                         stayButton.setEnabled(false);
                         dealButton.setEnabled(true);
                         player.blackjackWin(currentBet);
-                        JOptionPane.showMessageDialog(null, "win!", "", JOptionPane.INFORMATION_MESSAGE);
                     }
                     else if (util.calculateHand(dealer.hand) == 21)
                     {
@@ -211,6 +215,8 @@ public class gui
 
             if (playerScore > 21)
             {
+                cardReveal = true;
+                panel.repaint(); //update panel to reveal the hidden card
                 JOptionPane.showMessageDialog(null, "you bust!", "", JOptionPane.ERROR_MESSAGE);
 
                 //resetgame
