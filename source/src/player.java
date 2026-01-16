@@ -3,13 +3,13 @@ import java.util.ArrayList;
 public class player
 {
 
-    private int money;
+    private double money;
     ArrayList<String> hand = new ArrayList<String>();
     int handScore;
     boolean busted;
 
     //player object
-    public player(int initialMoney)
+    public player(double initialMoney)
     {
         this.money = initialMoney;
         this.hand = new ArrayList<>();
@@ -40,25 +40,25 @@ public class player
         System.out.println("player stands");
     }
 
-    public int getMoney()
+    public double getMoney()
     {
         return this.money;
     }
 
     //winning money method
-    public void winMoney(int bet)
+    public void winMoney(double bet)
     {
         this.money += bet * 2;
     }
 
-    public void blackjackWin(int bet)
+    public void blackjackWin(double bet)
     {
         this.money += (bet * 2) + (bet / 2);
     }
 
 
 
-    public void pushMoney(int bet)
+    public void pushMoney(double bet)
     {
         this.money += bet;
     }
@@ -74,7 +74,7 @@ public class player
         return this.hand;
     }
 
-    public void bet(int amount)
+    public void bet(double amount)
     {
         this.money -= amount; //Deduct the bet amount from the player's money
     }

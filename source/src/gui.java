@@ -1,19 +1,21 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 
 public class gui
 {
     //vars
-    private final int cardWidth = 110;
-    private final int cardLength = 154;
+    private final int cardWidth = 165;  // Increased from 110 (1.5x)
+    private final int cardLength = 231; // Increased from 154 (1.5x)
     private boolean cardReveal = false;
+    private boolean doubleDownUsed = false;
     private final dealer dealer;
     private final Cards deck;
     private final player player;
     private final JLabel balanceLabel;
     private final JTextField betField;
-    int currentBet = 0;
+    double currentBet = 0;
     int playerScore = 0;
 
     public gui ()
@@ -21,15 +23,20 @@ public class gui
         //instances
         dealer = new dealer();
         deck = new Cards();
-        player = new player(500);
+        player = new player(500.0);
         deck.shuffleDeck();
 
         //main window
         JFrame frame = new JFrame("Blackjack 2.0");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1200, 600);
+        frame.setSize(1800, 1000);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null); //set frame to middle of the screen
+
+        // Set larger font for message dialogs
+        Font messageFont = new Font("Arial", Font.PLAIN, 28);
+        UIManager.put("OptionPane.messageFont", messageFont);
+        UIManager.put("OptionPane.buttonFont", new Font("Arial", Font.BOLD, 24));
 
         //workspace inside the window
         JPanel panel = new JPanel()
@@ -73,7 +80,20 @@ public class gui
 
                     //draws cards
                     Image cardImage = new ImageIcon(getClass().getResource("/cards/" + card + ".png")).getImage();
-                    g.drawImage(cardImage, 20 + (i * (cardWidth + 20)), 350, cardWidth, cardLength, null);
+                    int x = 20 + (i * (cardWidth + 20));
+                    int y = 550;  // Increased from 350 for better spacing in larger window
+
+                    if (doubleDownUsed && i == playerHand.size() - 1) {
+                        Graphics2D g2 = (Graphics2D) g;
+                        AffineTransform oldTransform = g2.getTransform();
+                        double centerX = x + (cardWidth / 2.0);
+                        double centerY = y + (cardLength / 2.0);
+                        g2.rotate(Math.toRadians(90), centerX, centerY);
+                        g2.drawImage(cardImage, x, y, cardWidth, cardLength, null);
+                        g2.setTransform(oldTransform);
+                    } else {
+                        g.drawImage(cardImage, x, y, cardWidth, cardLength, null);
+                    }
 
                 }
 
@@ -85,15 +105,26 @@ public class gui
         //button panel (where buttons are located)
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.setBackground(new Color(255, 255, 255));
+        buttonPanel.setPreferredSize(new Dimension(1800, 85)); // Reduced height further
+
+        // Create larger font for UI elements
+        Font largeFont = new Font("Arial", Font.PLAIN, 24);
+        Font buttonFont = new Font("Arial", Font.BOLD, 22);
 
         //leftside of button panel
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new FlowLayout()); //making it "flow" so we can add to left of butpanel
         leftPanel.setBackground(new Color(255, 255, 255));
-        betField = new JTextField(3);
+        betField = new JTextField(4);
+        betField.setFont(largeFont);
+        betField.setPreferredSize(new Dimension(100, 50));
+        JLabel betLabel = new JLabel("bet");
+        betLabel.setFont(largeFont);
         JButton dealButton = new JButton("deal");
         dealButton.setFocusable(false);
-        leftPanel.add(new JLabel("bet"));
+        dealButton.setFont(buttonFont);
+        dealButton.setPreferredSize(new Dimension(120, 60));
+        leftPanel.add(betLabel);
         leftPanel.add(betField);
         leftPanel.add(dealButton);
 
@@ -103,11 +134,27 @@ public class gui
         middlePanel.setBackground(new Color(255, 255, 255));
         JButton hitButton = new JButton("hit");
         hitButton.setFocusable(false);
+        hitButton.setFont(buttonFont);
+        hitButton.setPreferredSize(new Dimension(120, 60));
+        JButton doubleDownButton = new JButton("double");
+        doubleDownButton.setFocusable(false);
+        doubleDownButton.setFont(buttonFont);
+        doubleDownButton.setPreferredSize(new Dimension(120, 60));
+        doubleDownButton.setEnabled(false);
+        JButton surrenderButton = new JButton("surrender");
+        surrenderButton.setFocusable(false);
+        surrenderButton.setFont(buttonFont);
+        surrenderButton.setPreferredSize(new Dimension(150, 60));
+        surrenderButton.setEnabled(false);
         JButton stayButton = new JButton("stand");
         stayButton.setFocusable(false);
+        stayButton.setFont(buttonFont);
+        stayButton.setPreferredSize(new Dimension(120, 60));
         stayButton.setEnabled(false);
         hitButton.setEnabled(false);
         middlePanel.add(hitButton);
+        middlePanel.add(doubleDownButton);
+        middlePanel.add(surrenderButton);
         middlePanel.add(stayButton);
 
 
@@ -115,7 +162,8 @@ public class gui
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new FlowLayout());
         rightPanel.setBackground(new Color(255, 255, 255));
-        balanceLabel = new JLabel("Balance: $" + player.getMoney());
+        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", player.getMoney()));
+        balanceLabel.setFont(largeFont);
         rightPanel.add(balanceLabel);
 
         //adding actions to buttons
@@ -124,7 +172,7 @@ public class gui
         dealButton.addActionListener(e -> {
             try
             {
-                int bet = Integer.parseInt(betField.getText());
+                double bet = Double.parseDouble(betField.getText());
                 currentBet = bet;
                 if (currentBet < 25)
                 {
@@ -140,6 +188,7 @@ public class gui
                     //rest game
                     dealer.clearHand();
                     player.clearHand();
+                    doubleDownUsed = false;
                     panel.repaint(); //clears the screen cause theres nothing in both dealer$players hand
 
                     //if less than 10 cards, reshuffles
@@ -151,7 +200,7 @@ public class gui
 
 
                     player.bet(bet);
-                    balanceLabel.setText("Balance: $" + player.getMoney());
+                    balanceLabel.setText("Balance: $" + String.format("%.2f", player.getMoney()));
                     //gives two cards to their respective array
                     dealer.firstTwo(deck);
                     player.firstTwo(deck);
@@ -163,6 +212,8 @@ public class gui
                     //make hit and stand ava
                     hitButton.setEnabled(true);
                     stayButton.setEnabled(true);
+                    doubleDownButton.setEnabled(true);
+                    surrenderButton.setEnabled(true);
 
                     //make deal un-ava so you cant deal mid-game
                     dealButton.setEnabled(false);
@@ -179,8 +230,11 @@ public class gui
                         cardReveal = false;
                         hitButton.setEnabled(false);
                         stayButton.setEnabled(false);
+                        doubleDownButton.setEnabled(false);
+                        surrenderButton.setEnabled(false);
                         dealButton.setEnabled(true);
                         player.blackjackWin(currentBet);
+                        doubleDownUsed = false;
                     }
                     else if (util.calculateHand(dealer.hand) == 21)
                     {
@@ -188,13 +242,24 @@ public class gui
 
                         //updates frame to show blackjack for dealer
                         panel.repaint();
+                        
+                        //force repaint to complete
+                        panel.paintImmediately(panel.getBounds());
 
-                        //resetgame
-                        cardReveal = false;
+                        //disable buttons
                         hitButton.setEnabled(false);
                         stayButton.setEnabled(false);
+                        doubleDownButton.setEnabled(false);
+                        surrenderButton.setEnabled(false);
                         dealButton.setEnabled(true);
+                        
+                        //show message dialog with card revealed (modal dialog gives time for user to see card)
                         JOptionPane.showMessageDialog(null, "dealer has blackjack!", "", JOptionPane.INFORMATION_MESSAGE);
+                        
+                        //reset game state after message is closed
+                        cardReveal = false;
+                        doubleDownUsed = false;
+                        panel.repaint();
                     }
 
                 }
@@ -209,6 +274,11 @@ public class gui
         {
             player.hit(deck);
             panel.repaint();
+            if (player.getHand().size() > 2)
+            {
+                doubleDownButton.setEnabled(false);
+                surrenderButton.setEnabled(false);
+            }
 
             //calcs players hand
             playerScore = util.calculateHand(player.getHand());
@@ -223,8 +293,57 @@ public class gui
                 cardReveal = false;
                 hitButton.setEnabled(false);
                 stayButton.setEnabled(false);
+                doubleDownButton.setEnabled(false);
+                surrenderButton.setEnabled(false);
                 dealButton.setEnabled(true);
+                doubleDownUsed = false;
             }
+        });
+
+        //TODO DOUBLE DOWN ACTIONS
+        doubleDownButton.addActionListener(e -> {
+            if (player.getHand().size() != 2)
+            {
+                JOptionPane.showMessageDialog(null, "double down only after first two cards", "", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (player.getMoney() < currentBet)
+            {
+                JOptionPane.showMessageDialog(null, "not enough balance to double down", "", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            player.bet(currentBet);
+            currentBet += currentBet;
+            balanceLabel.setText("Balance: $" + String.format("%.2f", player.getMoney()));
+
+            doubleDownUsed = true;
+            player.hit(deck);
+            panel.repaint();
+
+            //check if player busts on the double down hit
+            playerScore = util.calculateHand(player.getHand());
+            if (playerScore > 21)
+            {
+                cardReveal = true;
+                panel.repaint();
+                JOptionPane.showMessageDialog(null, "you bust!", "", JOptionPane.ERROR_MESSAGE);
+
+                //resetgame
+                cardReveal = false;
+                hitButton.setEnabled(false);
+                stayButton.setEnabled(false);
+                doubleDownButton.setEnabled(false);
+                surrenderButton.setEnabled(false);
+                dealButton.setEnabled(true);
+                doubleDownUsed = false;
+                return;
+            }
+
+            hitButton.setEnabled(false);
+            doubleDownButton.setEnabled(false);
+            surrenderButton.setEnabled(false);
+            stayButton.doClick();
         });
 
         //TODO STAND ACTIONS
@@ -236,6 +355,8 @@ public class gui
 
             //disable the hit button
             hitButton.setEnabled(false);
+            doubleDownButton.setEnabled(false);
+            surrenderButton.setEnabled(false);
 
             //timer to handle the dealer's moves with delay
             Timer dealerTimer = new Timer(800, null); // 800ms delay
@@ -254,12 +375,15 @@ public class gui
                         player.winMoney(currentBet);
 
 
-                        balanceLabel.setText("Balance: $" + player.getMoney());
+                        balanceLabel.setText("Balance: $" + String.format("%.2f", player.getMoney()));
                         //resetgame
                         cardReveal = false;
                         hitButton.setEnabled(false);
                         stayButton.setEnabled(false);
+                        doubleDownButton.setEnabled(false);
+                        surrenderButton.setEnabled(false);
                         dealButton.setEnabled(true);
+                        doubleDownUsed = false;
                         return;
                     }
                 } else {
@@ -282,17 +406,51 @@ public class gui
                     }
 
                     //update money
-                    balanceLabel.setText("Balance: $" + player.getMoney());
+                    balanceLabel.setText("Balance: $" + String.format("%.2f", player.getMoney()));
                     //resetgame
                     cardReveal = false;
                     hitButton.setEnabled(false);
                     stayButton.setEnabled(false);
+                    doubleDownButton.setEnabled(false);
+                    surrenderButton.setEnabled(false);
                     dealButton.setEnabled(true);
+                    doubleDownUsed = false;
                 }
             });
 
             dealerTimer.setRepeats(true); // Timer repeats for dealer's actions
             dealerTimer.start(); // Start the timer
+        });
+
+        //TODO SURRENDER ACTIONS
+        surrenderButton.addActionListener(e -> {
+            //only allow surrender after initial deal (2 cards)
+            if (player.getHand().size() != 2)
+            {
+                JOptionPane.showMessageDialog(null, "surrender only available after first two cards", "", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            //return half the bet to the player (they already bet the full amount, so add back half)
+            double halfBet = currentBet / 2.0;
+            player.pushMoney(halfBet);
+            balanceLabel.setText("Balance: $" + String.format("%.2f", player.getMoney()));
+
+            //reveal dealer's hole card
+            cardReveal = true;
+            panel.repaint();
+
+            //show surrender message
+            JOptionPane.showMessageDialog(null, "surrendered", "", JOptionPane.INFORMATION_MESSAGE);
+
+            //reset game
+            cardReveal = false;
+            hitButton.setEnabled(false);
+            stayButton.setEnabled(false);
+            doubleDownButton.setEnabled(false);
+            surrenderButton.setEnabled(false);
+            dealButton.setEnabled(true);
+            doubleDownUsed = false;
         });
 
         //add individual buttons&buttons to the button panel
