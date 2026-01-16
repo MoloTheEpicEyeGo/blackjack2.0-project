@@ -1,4 +1,4 @@
-# Blackjack 2.0 (README UPDATED 1/8/25)
+# Blackjack 2.0 (README UPDATED 1/15/2026)
 
 Blackjack 2.0 is a gui-based simulation of the classic casino card game, Blackjack. The game allows a single player to play against the dealer with standard Blackjack rules, including hitting, standing, busting, and scoring. The program supports advanced mechanics such as betting, double down, surrender, checking for blackjack, and handling bust scenarios.
 
